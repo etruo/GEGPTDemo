@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "website",
+    "channels",
 ]
 
 MIDDLEWARE = [
@@ -68,7 +69,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "GEGPTDemo.wsgi.application"
+#WSGI_APPLICATION = "GEGPTDemo.wsgi.application"
+ASGI_APPLICATION = "GEGPTDemo.routing.application"
 
 
 # Database

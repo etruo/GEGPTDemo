@@ -3,22 +3,12 @@ from django.http import HttpResponse
 from .prompt_completions_functions import *
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt 
-import json
+from channels.generic.websocket import AsyncWebsocketConsumer
+
 
 # Create your views here.
 # this jjawn is the request handler! , not actual "views"
 
-
-def say_meow(request):
-    ##return HttpResponse('meoooooow')
-
-
-    # debug example
-    x = 2
-
-    # example of using with parameters between .html file, rather than just straight text
-    
-    return render(request, "meow.html", { "name" : "daddy"})
 
 # debugging process:
 # 0. breakpoint, run
@@ -33,18 +23,19 @@ import json
 import openai 
 import pandas as pd
 import numpy as np
-import pickle
-import os
 from transformers import GPT2TokenizerFast
 from typing import List
 import wordfreq
+import sys
 
 
 
 #graham1118@gmail.com Key (AT CAPACITY)
 #openai.api_key = "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"
 #gks.kenan@gmail.com Key
-openai.api_key = "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"
+#openai.api_key = "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"
+#new gks.kenan@gmail.com Key, because the old one got deleted
+openai.api_key = "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"
 
 
 #We need a separate embedding modle for the data and the user's query
@@ -162,7 +153,7 @@ def construct_prompt(question, answer_len, custom_instructions, mode = "Q&A"):
   if mode == "General":
     header = ""
 
-  if mode == "Q&A":
+  if mode == "Q&amp;A":
     header = """Answer the question below as truthfully as possible using the 
     provided context, and if the answer is not contained 
     within the text below, say "I don't know."\n\nContext:\n"""
@@ -217,34 +208,39 @@ VOCAB_API_PARAMS = {
 
 #FOR RESEARCH ARTICLES
 def add_sources(doc_objects):    
-    print(f"\n\n\nI found {len(doc_objects)} article(s) to inform my answer:")
+    sources_titles = []
+    sources_quotes = []
+    
+    if len(doc_objects) == 1:
+        sources_header = f"\n\n\nI found {len(doc_objects)} article to inform my answer\n\n"
+    else:
+        sources_header = f"\n\n\nI found {len(doc_objects)} articles to inform my answer\n\n"
+    
     for i in range(len(doc_objects)):
-        print(str(i+1) + ") " + doc_objects[i].Title + " (" + doc_objects[i].DOI + ")" + "\n" + doc_objects[i].Paragraph)
-        print("\n\n")
+        sources_titles.append(str(i+1) + ") " + doc_objects[i].Title + " (" + doc_objects[i].DOI + ")")
+        sources_quotes.append(doc_objects[i].Paragraph)
+    return sources_quotes, sources_titles, sources_header
+        
     
 
 #Strips punctuation from words. Used in add_vocab
-def strip_words(word):
+def strip_word(word):
     return word.strip('{[]}\"\'.,();:-\n')
 
-def add_vocab(response):
-    words_defined = []
-    
-    response = str(response)
-    print("\n\n\nRelevant Vocabulary:")
-    words = response.split(' ')
-    words = map(strip_words, words)
-    threshold_to_define = 3.2 #logarithmic frequency of a word in the english language
-    for word in words:
-        if wordfreq.zipf_frequency(word, "en", wordlist = 'best') <= threshold_to_define and word not in words_defined:
-            word_to_define = "please define the word \"" + word + "\" in 1 sentence."
-            definition = openai.Completion.create(prompt=word_to_define, **VOCAB_API_PARAMS)
-            definition = definition["choices"][0]["text"].strip(" \n")
-            print("\n\t*" + word + ": " + definition)
-            words_defined.append(word)
 
 
-import sys
+@csrf_exempt
+def define_word(request):
+    if request.method == "POST":
+        word = request.POST.get('word')
+        word = strip_word(word)
+        prompt = """Please define the following word in one sentence.
+        WORD: """ + word
+        definition_response = openai.Completion.create(prompt=prompt, **VOCAB_API_PARAMS)
+        definition = definition_response["choices"][0]['text'].strip(" \n")
+        return JsonResponse({'definition': definition})
+
+
 
 #   DESCRIPTION: Returns a response given a question
 #   PARAMETERS:
@@ -256,40 +252,70 @@ import sys
 #   FUNCTIONS USED:
 #      - construct_prompt()
 
-def ask(query, answer_len, mode = "Q&A", vocab = True, custom_instructions = ""):
-   
+def ask(query, answer_len, mode = "Q&A", vocab = False, custom_instructions = ""): 
     print(query, answer_len, mode, vocab, custom_instructions)
     prompt, doc_sections = construct_prompt(query, answer_len, custom_instructions, mode=mode)
+
+    #response = openai.Completion.create(prompt=prompt, stream = False, **COMPLETIONS_API_PARAMS)
+    response = "The quick brown fox jumped over the log"
+
+    sources_quotes, sources_titles, sources_header = add_sources(doc_sections) #The urls will always be printed, but should be hidden, user can specify if they want it to show
     
-    response = openai.Completion.create(prompt=prompt, stream = False, **COMPLETIONS_API_PARAMS)
-    #for response in openai.Completion.create(prompt=prompt, stream = False, **COMPLETIONS_API_PARAMS):
-     # sys.stdout.write(response.choices[0].text)
-      #sys.stdout.flush()
     
+    
+    #return response.choices[0].text, sources_header, sources_quotes, sources_titles
+    return response, sources_header, sources_quotes, sources_titles
 
-    add_sources(doc_sections) #The urls will always be printed, but should be hidden, user can specify if they want it to show
-    if vocab: add_vocab(response)
-    return response.choices[0].text
+    # for response in openai.Completion.create(prompt=prompt, stream = True, **COMPLETIONS_API_PARAMS):
+    #     yield response.choices[0].text
 
 
+class GenerateResponseConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.accept()
 
+    async def disconnect(self, close_code):
+        pass
 
+    async def receive(self, text_data):
+        data = json.loads(text_data)
 
-@csrf_exempt
-def generate_response(request):
-    print(request.method) #prints statement to detect POST or GET requests
-    if request.method == 'POST':
-        data = request.POST.dict()
-        
         user_query = data['query']
         response_length = int(data['length'])
         define_vocab = bool(data['vocab'])
         custom_instructions = data['instructions']
         mode = data['mode']
 
-        # replace with resposnse generations
-        GPTresponse = ask(user_query, response_length, mode, define_vocab, custom_instructions)
-        test = 'yo!'
-        print("HEYYYYYYYYYYYYY")
-        return render(request, 'monolith.html', {'response': test})    
+        print("Stream func running")
+        async for word in ask(user_query, response_length, mode, define_vocab, custom_instructions):
+            await self.send(text_data=json.dumps({
+                'response': word
+            }))
+
+
+
+#make soures pop up one by one
+#Then make GPT response pop up before it
+
+#add buffer bar
+
+
+
+@csrf_exempt
+def generate_response(request):
+    print("original func running")
+    data = request.POST.dict()
+    
+    user_query = data['query']
+    response_length = int(data['length'])
+    define_vocab = False if data['vocab'] == 'false' else True
+    custom_instructions = data['instructions']
+    mode = data['mode']
+
+    # replace with response generations
+    GPTresponse, sources_header, sources_quotes, sources_titles = ask(user_query, response_length, mode, define_vocab, custom_instructions)
+    return JsonResponse({'response': GPTresponse, 'sources_header': sources_header, 'sources_quotes': sources_quotes, 'sources_titles': sources_titles}) 
+    
+
+def home(request):
     return render(request, 'monolith.html')

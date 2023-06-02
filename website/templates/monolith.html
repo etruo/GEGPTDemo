@@ -1,10 +1,12 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monolith AI</title>
-    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
 
     <style>
     .dropdown-btn {
@@ -19,11 +21,11 @@
         float: left;
         margin-right: 10px;
         transition: transform 0.3s ease-out;
-        transform: rotate(0deg); /* Start with the triangle rotated 90 degrees */
+        transform: rotate(0deg); /* Start with the triangle rotated 0 degrees */
     }
 
     .dropdown-btn.rotate::after {
-        transform: rotate(90deg); /* Rotate to 0 degrees when clicked */
+        transform: rotate(90deg); /* Rotate to 90 degrees when clicked */
     }
 
 
@@ -48,7 +50,21 @@
     }
 
     .dropdown-content.show {
-        max-height: 150px; 
+        max-height: 2000px; /* adjust this to control how far the dropdown slides*/
+    }
+
+
+    .tooltip {
+        display: none;
+        position: absolute;
+        background-color: white;
+        border-radius: 5px;
+        padding: 5px;
+        font-family: Poppins Regular;
+        max-width: 300px;
+        font-size: 10px;
+        z-index: 1000;  /* so the tooltip appears above all other elements */
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
     }
     </style>
 
@@ -57,30 +73,32 @@
 
     <!-- ETHAN: the code you need to look at is below this point. Ignore everything above-->
 
-    <div class="navigation" style = "float: right;">
+    <div class="navigation" style = "float: right; z-index:1;">
         <h3 class="title">MONOLITH</h3>
         <button class="login">login</button>
         <button class="signup">Sign Up</button>
     </div>
     <div class="main" style = "position: absolute; left: 300px; top: 100px;">
         
-        <div class = About>
-            <h3 class = "heading">When Google Scholar Meets ChatGPT:</h3>
-            <hr>
-            <p class = "paragraph">Monolith is an AI chatbot that's been trained on millions of peer-reviewed research papers and Wikipedia articles. What makes us unique? Our model tells you the exact sources where it got its information from, and summarizes it in flowing natural language.
+        
+        <div class = "about" style="margin-left: auto; margin-right: auto;">
+            <h3 class = "heading" style="position:relative; left:70px;">When Google Scholar Meets ChatGPT:</h3>
+            <hr style="position:relative; left:69px">
+            <p class = "paragraph" style="position:relative; left:70px;">Monolith is an AI chatbot that's been trained on millions of peer-reviewed research papers and Wikipedia articles. What makes us unique? Our model tells you the exact sources where it got its information from, and summarizes it in flowing natural language.
         </div>
+        
 
        
-        <div class="buttons" style = "position: relative; right: 80px;">   
+        <div class="buttons">   
 
             <!-- When these buttons are clicked, they should update a variable called "mode" 
                  with the value of the button (The button's name)
             -->
 
-            <button class="btn">General</button>
-            <button class="btn">Q&A</button>
-            <button class="btn">Instructions</button>
-            <button class="btn">Workflow</button>
+            <button id = "general" class="btn">General</button>
+            <button id = "qa" class="btn">Q&A</button>
+            <button id = "instructions" class="btn">Instructions</button>
+            <button id = "workflow" class="btn">Workflow</button>
 
 
             <script>
@@ -98,31 +116,12 @@
                     
                     
                     this.classList.toggle("active"); // just add this
+
+
                   });
                 }
 
             </script>
-
-            <button id="my-button">Click me</button>
-
-            <script>
-            document.getElementById('my-button').addEventListener('click', function() {
-                var name = this.innerHTML;
-            
-                fetch('/user_mode/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        'name': name
-                    }),
-                })
-                .then(response => response.json())
-                .then(data => alert(data.result));
-            });
-            </script>
-
             
         </div>
         
@@ -131,8 +130,6 @@
 
         <div class="options">
             <h2 class="dropdown-btn">Advanced Options</h2>
-
-            
 
             <div class="dropdown-content">
                 <div class="dropdown-content-inner">
@@ -146,19 +143,19 @@
                     </div>
                     
                     <div class="slider">
-                        <label for="answer-length">Answer Length (in words)</label>
+                        <label for="answer-length">Max Answer Length (in words)</label>
                         <!-- When this slider is slid, it should update a variable called 
                             "answer_length" to equal the value of the slider
                          -->
                         <label class = "thirty" for="answer-length">30</label>
-                        <input type="range" id="answer-length" min="30" max="3000" value="0">
+                        <input type="range" id="answer-length" min="30" max="3000" value="1000">
                         <label for="answer-length">3000</label>
                     </div>
                     <div class=custom-instructions>
                         <label class = "custom-instructions-label" for="custom-instructions-enter">Custom Instructions</label>
                         <!-- Whatever is input into this text box should be saved as a string to a variable called "custom_instructions"
                          -->
-                        <textarea id="custom-instructions-enter" class="custom-instructions-enter" rows="3" cols="40" style="resize: none; position: relative; top: 6px;"></textarea>
+                        <textarea id="custom-instructions-enter" class="custom-instructions-enter" rows="3" cols="54" style="resize: none; position: relative; top: 6px;"></textarea>
                     </div>
                 </div>
 
@@ -182,62 +179,231 @@
 
 
 
+        
+            <form  id="generate-response-form" name="generate_response">
+                {% csrf_token %}
+                <textarea id="query-input" class="query-input" rows="5" cols="87" placeholder="What are you curious about?" style="resize: none; position:relative; left:100px"></textarea>
+                <br>
+                <input class="submit" id="final-submit" type="button" value="Ask" style="position:relative; left:100px;">
+            </form>
 
-        <form action="{% url 'generate_response' %}" method="post">
-            <textarea id="query-input" class="query-input" rows="5" cols="100" placeholder="What are you curious about?" style="resize: none;"></textarea>
-            <br>
+            <div class="GPT-response-div" id="GPT-response-div" style="width:600px; position:relative; left: 100px; font-size: 15px;">
+                <!--  <p class='response' id="response" style="font-family: Poppins Regular; color:white; white-space: pre-line;"><pre>{{response}}</pre></p>  -->
+                <div id="response" style="font-family: Poppins Regular; color:white; white-space: pre-line;"></div>
+                
+                <div class="sources-div" id="sources-div" style="display:none;">
+                    <h2 class="dropdown-btn" id="sources-header" style="font-family: Poppins Regular; color:white;">{{sources_header}}</h2>
+                    <div class="dropdown-content" id="dropdown-content-sources">
+                        <div class="dropdown-content-inner" id="dropdown-content-inner-sources">
+                            <!-- <p class='response' id="sources" style="font-family: Poppins Regular; color:white; white-space: pre-line;"><pre>{{sources}}</pre></p> -->
+                        </div>
+                    </div>
+                </div>
 
-            <!-- When this button is clicked, it should call the ask() function in python-->
-            <input class = "submit" type="submit" value="Ask">
-        </form>
-
-        <div class="GPT-response">
-            <!-- When you call the ask() function in python, it will output a response. Put that response in the paragraph tags (<p></p>) below -->
-            <p class = "response">I'm the GPT Response!</p>
-            <p>{{ response }}</p>
-
-        </div>
+                <script>
+                    let dropdownBtnSources = document.querySelector('#sources-header');
+                    let dropdownContentSources = document.querySelector('#dropdown-content-sources');
+        
+                    dropdownBtnSources.addEventListener('click', function() {
+                        let isOpen = dropdownContentSources.classList.contains('show');
+                        dropdownContentSources.classList.toggle('show', !isOpen);
+                        dropdownBtnSources.classList.toggle('rotate', !isOpen);
+                    });
+                </script>
+            </div>
+        
+        
         
         
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <script>
-        document.getElementById('define-vocab').addEventListener('change', function() {
-            var vocab = this.checked;
-        });
+
+        function getCsrfToken() {
+            return jQuery("[name=csrfmiddlewaretoken]").val();
+        }
+        
+        document.getElementById('final-submit').addEventListener('click', function(event) {
+            document.getElementById('response').innerHTML = "";
+            document.getElementById('sources-div').style.display = 'none';
+            
+            event.preventDefault();
+            var postUrl = "generate_response/";
+
+
+            // Get the value from the input field
+            let query = document.getElementById('query-input').value;
+            let vocab = document.getElementById('define-vocab').checked;
+            let length = document.getElementById('answer-length').value;
+            let instructions = document.getElementById('custom-instructions-enter').value;
+            let active = document.querySelectorAll(".buttons .btn.active")
+            let mode = active[0].innerHTML;
     
+            // combine the data
+            let dataToSend = {
+                'query': query,
+                'vocab': vocab,
+                'length': length,
+                'instructions': instructions,
+                'mode': mode
+            };
 
-        // Listen for changes to the slider
-        document.getElementById('answer-length').addEventListener('input', function() {
-            var length = this.value;
-        });
+            // console.log("javascript running")
+            // var socket = new WebSocket('ws://' + window.location.host + '/ws/generate_response/');
 
-        // Listen for changes to the custom instructions text box
-        document.getElementById('custom-instructions-enter').addEventListener('input', function() {
-            var instructions = this.value
-        });
+            // socket.onerror = function(error) {
+            //     console.error("WebSocket Error: ", error);
+            // };
 
-        // Listen for changes to the main query text box
-        document.getElementById('query-input').addEventListener('input', function() {
-            var query = this.value
-        });
+            // console.log("socket created")
+            // console.log(socket.readyState)
+            // socket.onopen = function(e) {
+            //     socket.send(JSON.stringify(dataToSend));
+            //     console.log("request sent")
+            // };
 
-        document.getElementByClass('submit').addEventListener('input', function() {
-            fetch('/generate_response/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
+            // socket.onmessage = function(event) {
+            //     let data = JSON.parse(event.data);
+            //     document.getElementById("response").innerHTML += data.response;
+            // };
+
+            
+
+            $.ajax({
+                url : postUrl, // the endpoint
+                type : "POST", // http method
+                data : dataToSend, // data sent with the post request
+                headers: {'X-CSRFToken': getCsrfToken()},
+
+                // handle a successful response
+                success : function(json) {
+                    //document.getElementById("response").innerHTML = json.response
+
+
+                    let words = json.response.split(" ");
+
+                    let responseDiv = document.getElementById("response");
+
+                    // Create a tooltip div
+                    let tooltip = document.createElement("div");
+                    tooltip.className = "tooltip";
+                    document.body.appendChild(tooltip);
+
+                    
+                    // Keep track of whether the tooltip is visible and which word it is linked to
+                    let tooltipVisibleWord = null;
+
+                    words.forEach((word, index) => {
+                        let span = document.createElement("span");
+                        span.textContent = word + (index < words.length - 1 ? " " : "");
+                        span.className = "clickable-word";
+
+                        span.addEventListener("click", function(event) {
+                            console.log('word clicked');
+                            // If the tooltip is currently visible for this word, hide it
+                            if (tooltipVisibleWord === span) {
+                                tooltip.style.display = "none";
+                                tooltipVisibleWord = null;
+                                tooltip.textContent = '';
+                            } else {
+                                // Set the definition for the tooltip
+                                tooltip.textContent = '';
+                                tooltip.style.left = (event.pageX - 18) + "px";
+                                tooltip.style.top = (event.pageY + 13) + "px";
+                                
+                                // Show the tooltip
+                                tooltip.style.display = "block";
+                                console.log("div shown")
+                                tooltipVisibleWord = span;
+
+                                $.ajax({
+                                    url : "define_word/", // the endpoint
+                                    type : "POST", // http method
+                                    data : { 'word': word }, // data sent with the post request
+                                    headers: {'X-CSRFToken': getCsrfToken()},
+
+                                    // handle a successful response
+                                    success : function(json) {
+                                        // Set the definition for the tooltip
+                                        tooltip.textContent = json.definition;
+                                        
+                                    },
+                                    // handle a non-successful response
+                                    error : function(xhr,errmsg,err) {
+                                        console.log(xhr.status + ": " + xhr.responseText);
+                                    }
+                                });
+                            }
+                        });
+
+                        responseDiv.appendChild(span);
+                    });
+
+
+                    document.getElementById('sources-div').style.display = 'block';
+                    document.getElementById("sources-header").innerHTML = json.sources_header
+                    
+                    let quotes = json.sources_quotes;
+                    let titles = json.sources_titles;
+
+                    let subResponseDiv = document.getElementById("dropdown-content-inner-sources");
+                    //let john1 = null;
+                    //let john2 = null;
+        
+                    let heading_id = null;
+                    let outer_div_id = null;
+
+                    titles.forEach((title, index) => {
+                        let heading = document.createElement("h2");
+                        heading.className = 'dropdown-btn';
+                        heading_id = "sources-title-" + index.toString();
+                        heading.id = heading_id;
+                        heading.style = "font-family: Poppins Regular; color:white;";
+                        heading.textContent = title;
+
+                        let outer_div = document.createElement("div");
+                        outer_div.className = "dropdown-content";
+                        outer_div_id = "dropdown-content-sources-" + index.toString();
+                        outer_div.id = outer_div_id;
+
+                        let inner_div = document.createElement("div");
+                        inner_div.className = "dropdown-content-inner";
+                        inner_div.id = "dropdown-content-inner-sources-" + index.toString();
+
+                        let paragraph = document.createElement("p");
+                        paragraph.style = "font-family: Poppins Regular; color:white; white-space: pre-line;";
+                        paragraph.id = "sources-quote-" + index.toString();
+                        paragraph.textContent = quotes[index];
+
+
+                        subResponseDiv.appendChild(heading);
+                        inner_div.appendChild(paragraph);
+                        outer_div.appendChild(inner_div);
+                        subResponseDiv.appendChild(outer_div);
+
+                        
+            
+                        heading.addEventListener('click', function() {
+                            let isOpen = outer_div.classList.contains('show');
+                            outer_div.classList.toggle('show', !isOpen);
+                            heading.classList.toggle('rotate', !isOpen);
+                        });
+
+                        
+                        
+                    });
                 },
-                body: JSON.stringify({
-                    'query': this.value,
-                }),
+
+                error : function(xhr,errmsg,err) {
+                    console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+                }
             });
         });
-
-
-        
-</script>
-
+    </script>
+    
+    
 
 </body>
 </html>

@@ -24,6 +24,7 @@
 }
 
 
+
 body {
     background-image: linear-gradient(to left, #DECBA4, #3E5151);
 }
@@ -122,11 +123,12 @@ body {
 }
 
 
+
+
 .heading{
     font-family: Poppins Regular;
-    position: relative;
-    left: 220px;
     color: white;
+    text-align: center;
 
 }
 
@@ -135,9 +137,8 @@ hr {
   border: none;
   height: 0.5px;
   width: 700px;
-  /* Set the hr color */
-  color: #FFF;  /* old IE */
-  background-color: #FFF;  /* Modern Browsers */
+  color: #FFF;
+  background-color: #FFF; 
 }
 
 
@@ -146,8 +147,6 @@ hr {
     font-family: Poppins Thin;
     color: white;
     width: 700px;
-    position: relative;
-    left: 60px;
     text-align: center;
 }
 
@@ -213,9 +212,7 @@ hr {
     top: -51px;
 }
 
-.custom-instructions-enter{
-    width: 300px;
-}
+
 
 textarea {
   border: 2px solid grey;
@@ -226,6 +223,7 @@ textarea {
   resize: none;
   color: white;
 }
+
 
 
 
@@ -270,6 +268,18 @@ textarea {
 }
 
 
+
+.response{
+    font-family: Poppins Regular;
+    color:white;
+}
+
+
+
+
+.GPT-response-div{
+    width: 700px;
+}
 
 
 
