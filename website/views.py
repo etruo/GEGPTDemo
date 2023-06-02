@@ -25,8 +25,6 @@ import pandas as pd
 import numpy as np
 from transformers import GPT2TokenizerFast
 from typing import List
-import wordfreq
-import sys
 
 
 
