@@ -21,6 +21,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 #import packages
 import json
 import openai 
+import os
 import pandas as pd
 import numpy as np
 from transformers import GPT2TokenizerFast
@@ -254,15 +255,13 @@ def ask(query, answer_len, mode = "Q&A", vocab = False, custom_instructions = ""
     print(query, answer_len, mode, vocab, custom_instructions)
     prompt, doc_sections = construct_prompt(query, answer_len, custom_instructions, mode=mode)
 
-    #response = openai.Completion.create(prompt=prompt, stream = False, **COMPLETIONS_API_PARAMS)
-    response = "The quick brown fox jumped over the log"
+    response = openai.Completion.create(prompt=prompt, stream = False, **COMPLETIONS_API_PARAMS)
+    
 
     sources_quotes, sources_titles, sources_header = add_sources(doc_sections) #The urls will always be printed, but should be hidden, user can specify if they want it to show
     
     
-    
-    #return response.choices[0].text, sources_header, sources_quotes, sources_titles
-    return response, sources_header, sources_quotes, sources_titles
+    return response.choices[0].text, sources_header, sources_quotes, sources_titles
 
     # for response in openai.Completion.create(prompt=prompt, stream = True, **COMPLETIONS_API_PARAMS):
     #     yield response.choices[0].text

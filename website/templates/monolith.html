@@ -133,14 +133,6 @@
 
             <div class="dropdown-content">
                 <div class="dropdown-content-inner">
-
-                    <div class="checkbox">
-                        <label for="define-vocab">Define Vocab</label>
-                        <!-- When this checkbox is checked, it should update a variable called 
-                            "vocab" to equal True
-                         -->
-                        <input type="checkbox" id="define-vocab">
-                    </div>
                     
                     <div class="slider">
                         <label for="answer-length">Max Answer Length (in words)</label>
@@ -238,8 +230,14 @@
             let vocab = document.getElementById('define-vocab').checked;
             let length = document.getElementById('answer-length').value;
             let instructions = document.getElementById('custom-instructions-enter').value;
+            
+            let mode;
             let active = document.querySelectorAll(".buttons .btn.active")
-            let mode = active[0].innerHTML;
+            if (active.length > 0) {
+                mode = active[0].innerHTML;
+            } else {
+                mode = "General";
+            }
     
             // combine the data
             let dataToSend = {
@@ -373,7 +371,7 @@
                         inner_div.id = "dropdown-content-inner-sources-" + index.toString();
 
                         let paragraph = document.createElement("p");
-                        paragraph.style = "font-family: Poppins Regular; color:white; white-space: pre-line;";
+                        paragraph.style = "font-family: Poppins Thin; color:white; white-space: pre-line;";
                         paragraph.id = "sources-quote-" + index.toString();
                         paragraph.textContent = quotes[index];
 
