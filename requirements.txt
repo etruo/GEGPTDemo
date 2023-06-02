@@ -10,3 +10,4 @@ channels==4.0.0
 pinecone-client==2.2.1
 boto3==1.26.141
 smart_open==6.3.0
+dj-database-url==2.0.0
