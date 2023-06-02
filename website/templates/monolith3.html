@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Monolith</title>
+</head>
+<body>
+    <!-- Your website's structure, etc... -->
+    <div class="navigation" style = "float: right;">
+        <h3 class="title">MONOLITH</h3>
+        <button class="login">login</button>
+        <button class="signup">Sign Up</button>
+    </div>
+    <div class="main" style = "position: absolute; left: 300px; top: 100px;">
+        
+        <div class = About>
+            <h3 class = "heading">When Google Scholar Meets ChatGPT:</h3>
+            <hr>
+            <p class = "paragraph">Monolith is an AI chatbot that's been trained on millions of peer-reviewed research papers and Wikipedia articles. What makes us unique? Our model tells you the exact sources where it got its information from, and summarizes it in flowing natural language.
+        </div>
+        
+    <div class="main">
+        <form id="query-form" action="{% url 'generate_response' %}" method="post">
+            <textarea name="query" id="query-input" class="query-input" rows="5" cols="100" placeholder="What are you curious about?" style="resize: none;"></textarea>
+            <br>
+            <input type="checkbox" name="define-vocab" id="define-vocab">
+            <input type="range" name="length" id="answer-length" min="30" max="3000" value="0">
+            <textarea name="instructions" id="custom-instructions-enter" class="custom-instructions-enter" rows="3" cols="40" style="resize: none; position: relative; top: 6px;"></textarea>
+            <input class="submit" type="submit" value="Ask">
+        </form>
+    </div>
+
+    <div class="GPT-response">
+        <p class="response">I'm the GPT Response!</p>
+        <p>{{ response }}</p>
+    </div>
+
+    <script>
+        document.getElementById('query-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            let formData = {
+                'query': document.getElementById('query-input').value,
+                'define-vocab': document.getElementById('define-vocab').checked,
+                'length': document.getElementById('answer-length').value,
+                'instructions': document.getElementById('custom-instructions-enter').value
+            };
+
+            fetch('/generate_response/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')  // Handle CSRF token
+                },
+                body: JSON.stringify(formData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.querySelector('.response').textContent = data.response;
+            });
+        });
+
+        function getCookie(name) {
+            // Function to get CSRF token
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>

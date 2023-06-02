@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monolith AI</title>
+    <link rel="stylesheet" href="./styles.css">
+
+    <style>
+    .dropdown-btn {
+        cursor: pointer;
+        user-select: none;
+        font-size: 15px;
+    }
+
+    .dropdown-btn::after {
+        content: '▶';
+        font-size: 15px;
+        float: left;
+        margin-right: 10px;
+        transition: transform 0.3s ease-out;
+        transform: rotate(0deg); /* Start with the triangle rotated 90 degrees */
+    }
+
+    .dropdown-btn.rotate::after {
+        transform: rotate(90deg); /* Rotate to 0 degrees when clicked */
+    }
+
+
+    .dropdown-content {
+        font-family: Poppins Thin;
+        font-size: 15px;
+        overflow: hidden;
+        max-height: 0;
+        transition: max-height 0.3s ease-in-out;
+        position: relative;
+        left: 61px;
+        top: -10px;
+    }
+
+    .dropdown-content-inner {
+        transform: translateY(-100%);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .dropdown-content.show .dropdown-content-inner {
+        transform: translateY(0);
+    }
+
+    .dropdown-content.show {
+        max-height: 150px; 
+    }
+    </style>
+
+</head>
+<body>
+
+    <!-- ETHAN: the code you need to look at is below this point. Ignore everything above-->
+
+    <div class="navigation" style = "float: right;">
+        <h3 class="title">MONOLITH</h3>
+        <button class="login">login</button>
+        <button class="signup">Sign Up</button>
+    </div>
+    <div class="main" style = "position: absolute; left: 300px; top: 100px;">
+        
+        <div class = About>
+            <h3 class = "heading">When Google Scholar Meets ChatGPT:</h3>
+            <hr>
+            <p class = "paragraph">Monolith is an AI chatbot that's been trained on millions of peer-reviewed research papers and Wikipedia articles. What makes us unique? Our model tells you the exact sources where it got its information from, and summarizes it in flowing natural language.
+        </div>
+
+       
+        <div class="buttons" style = "position: relative; right: 80px;">   
+
+            <!-- When these buttons are clicked, they should update a variable called "mode" 
+                 with the value of the button (The button's name)
+            -->
+
+            <button class="btn">General</button>
+            <button class="btn">Q&A</button>
+            <button class="btn">Instructions</button>
+            <button class="btn">Workflow</button>
+
+
+            <script>
+                var acc = document.getElementsByClassName("btn");
+                var i;
+
+                for (i = 0; i < acc.length; i++) {
+                  acc[i].addEventListener("click", function() {
+                    
+                    let active = document.querySelectorAll(".buttons .btn.active");
+                    for(let j = 0; j < active.length; j++){
+                        active[j].classList.remove("active");
+                        
+                    }
+                    
+                    
+                    this.classList.toggle("active"); // just add this
+                  });
+                }
+
+            </script>
+
+            <button id="my-button">Click me</button>
+
+            <script>
+            document.getElementById('my-button').addEventListener('click', function() {
+                var name = this.innerHTML;
+            
+                fetch('/user_mode/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        'name': name
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => alert(data.result));
+            });
+            </script>
+
+            
+        </div>
+        
+
+
+
+        <div class="options">
+            <h2 class="dropdown-btn">Advanced Options</h2>
+
+            
+
+            <div class="dropdown-content">
+                <div class="dropdown-content-inner">
+
+                    <div class="checkbox">
+                        <label for="define-vocab">Define Vocab</label>
+                        <!-- When this checkbox is checked, it should update a variable called 
+                            "vocab" to equal True
+                         -->
+                        <input type="checkbox" id="define-vocab">
+                    </div>
+                    
+                    <div class="slider">
+                        <label for="answer-length">Answer Length (in words)</label>
+                        <!-- When this slider is slid, it should update a variable called 
+                            "answer_length" to equal the value of the slider
+                         -->
+                        <label class = "thirty" for="answer-length">30</label>
+                        <input type="range" id="answer-length" min="30" max="3000" value="0">
+                        <label for="answer-length">3000</label>
+                    </div>
+                    <div class=custom-instructions>
+                        <label class = "custom-instructions-label" for="custom-instructions-enter">Custom Instructions</label>
+                        <!-- Whatever is input into this text box should be saved as a string to a variable called "custom_instructions"
+                         -->
+                        <textarea id="custom-instructions-enter" class="custom-instructions-enter" rows="3" cols="40" style="resize: none; position: relative; top: 6px;"></textarea>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+
+
+        <script>
+            let dropdownBtn = document.querySelector('.dropdown-btn');
+            let dropdownContent = document.querySelector('.dropdown-content');
+
+            dropdownBtn.addEventListener('click', function() {
+                let isOpen = dropdownContent.classList.contains('show');
+                dropdownContent.classList.toggle('show', !isOpen);
+                dropdownBtn.classList.toggle('rotate', !isOpen);
+            });
+        </script>
+
+
+
+
+
+        <form action="{% url 'generate_response' %}" method="post">
+            <textarea id="query-input" class="query-input" rows="5" cols="100" placeholder="What are you curious about?" style="resize: none;"></textarea>
+            <br>
+
+            <!-- When this button is clicked, it should call the ask() function in python-->
+            <input class = "submit" type="submit" value="Ask">
+        </form>
+
+        <div class="GPT-response">
+            <!-- When you call the ask() function in python, it will output a response. Put that response in the paragraph tags (<p></p>) below -->
+            <p class = "response">I'm the GPT Response!</p>
+            <p>{{ response }}</p>
+
+        </div>
+        
+        
+    </div>
+
+    <script>
+        document.getElementById('define-vocab').addEventListener('change', function() {
+            var vocab = this.checked;
+        });
+    
+
+        // Listen for changes to the slider
+        document.getElementById('answer-length').addEventListener('input', function() {
+            var length = this.value;
+        });
+
+        // Listen for changes to the custom instructions text box
+        document.getElementById('custom-instructions-enter').addEventListener('input', function() {
+            var instructions = this.value
+        });
+
+        // Listen for changes to the main query text box
+        document.getElementById('query-input').addEventListener('input', function() {
+            var query = this.value
+        });
+
+        document.getElementByClass('submit').addEventListener('input', function() {
+            fetch('/generate_response/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    'query': this.value,
+                }),
+            });
+        });
+
+
+        
+</script>
+
+
+</body>
+</html>

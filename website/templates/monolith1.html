@@ -1,0 +1,246 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monolith AI</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+
+    <style>
+    .dropdown-btn {
+        cursor: pointer;
+        user-select: none;
+        font-size: 15px;
+    }
+
+    .dropdown-btn::after {
+        content: '▶';
+        font-size: 15px;
+        float: left;
+        margin-right: 10px;
+        transition: transform 0.3s ease-out;
+        transform: rotate(0deg); /* Start with the triangle rotated 90 degrees */
+    }
+
+    .dropdown-btn.rotate::after {
+        transform: rotate(90deg); /* Rotate to 0 degrees when clicked */
+    }
+
+
+    .dropdown-content {
+        font-family: Poppins Thin;
+        font-size: 15px;
+        overflow: hidden;
+        max-height: 0;
+        transition: max-height 0.3s ease-in-out;
+        position: relative;
+        left: 61px;
+        top: -10px;
+    }
+
+    .dropdown-content-inner {
+        transform: translateY(-100%);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .dropdown-content.show .dropdown-content-inner {
+        transform: translateY(0);
+    }
+
+    .dropdown-content.show {
+        max-height: 150px; 
+    }
+    </style>
+
+</head>
+<body>
+
+    <!-- ETHAN: the code you need to look at is below this point. Ignore everything above-->
+
+    <div class="navigation" style = "float: right;">
+        <h3 class="title">MONOLITH</h3>
+        <button class="login">login</button>
+        <button class="signup">Sign Up</button>
+    </div>
+    <div class="main" style = "position: absolute; left: 300px; top: 100px;">
+        
+        <div class = About>
+            <h3 class = "heading">When Google Scholar Meets ChatGPT:</h3>
+            <hr>
+            <p class = "paragraph">Monolith is an AI chatbot that's been trained on millions of peer-reviewed research papers and Wikipedia articles. What makes us unique? Our model tells you the exact sources where it got its information from, and summarizes it in flowing natural language.
+        </div>
+
+       
+        <div class="buttons" style = "position: relative; right: 80px;">   
+
+            <!-- When these buttons are clicked, they should update a variable called "mode" 
+                 with the value of the button (The button's name)
+            -->
+
+            <button id = "general" class="btn">General</button>
+            <button id = "qa" class="btn">Q&A</button>
+            <button id = "instructions" class="btn">Instructions</button>
+            <button id = "workflow" class="btn">Workflow</button>
+
+
+            <script>
+                var acc = document.getElementsByClassName("btn");
+                var i;
+
+                for (i = 0; i < acc.length; i++) {
+                  acc[i].addEventListener("click", function() {
+                    
+                    let active = document.querySelectorAll(".buttons .btn.active");
+                    for(let j = 0; j < active.length; j++){
+                        active[j].classList.remove("active");
+                        
+                    }
+                    
+                    
+                    this.classList.toggle("active"); // just add this
+
+
+                  });
+                }
+
+            </script>
+            
+        </div>
+        
+
+
+
+        <div class="options">
+            <h2 class="dropdown-btn">Advanced Options</h2>
+
+            
+
+            <div class="dropdown-content">
+                <div class="dropdown-content-inner">
+
+                    <div class="checkbox">
+                        <label for="define-vocab">Define Vocab</label>
+                        <!-- When this checkbox is checked, it should update a variable called 
+                            "vocab" to equal True
+                         -->
+                        <input type="checkbox" id="define-vocab">
+                    </div>
+                    
+                    <div class="slider">
+                        <label for="answer-length">Answer Length (in words)</label>
+                        <!-- When this slider is slid, it should update a variable called 
+                            "answer_length" to equal the value of the slider
+                         -->
+                        <label class = "thirty" for="answer-length">30</label>
+                        <input type="range" id="answer-length" min="30" max="3000" value="0">
+                        <label for="answer-length">3000</label>
+                    </div>
+                    <div class=custom-instructions>
+                        <label class = "custom-instructions-label" for="custom-instructions-enter">Custom Instructions</label>
+                        <!-- Whatever is input into this text box should be saved as a string to a variable called "custom_instructions"
+                         -->
+                        <textarea id="custom-instructions-enter" class="custom-instructions-enter" rows="3" cols="20" style="resize: none; position: relative; top: 6px;"></textarea>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+
+
+        <script>
+            let dropdownBtn = document.querySelector('.dropdown-btn');
+            let dropdownContent = document.querySelector('.dropdown-content');
+
+            dropdownBtn.addEventListener('click', function() {
+                let isOpen = dropdownContent.classList.contains('show');
+                dropdownContent.classList.toggle('show', !isOpen);
+                dropdownBtn.classList.toggle('rotate', !isOpen);
+            });
+        </script>
+
+
+
+
+
+        <form action = "{% url 'generate_response' %}" method = "post" id="final-submit" name="generate_response">
+            {% csrf_token %}
+            <textarea id="query-input" class="query-input" rows="5" cols="100" placeholder="What are you curious about?" style="resize: none;"></textarea>
+            <br>
+            <input class = "submit" type="submit" value="Ask">
+            
+        </form>
+
+        <div class="GPT-response-div">
+            <!-- When you call the ask() function in python, it will output a response. Put that response in the paragraph tags (<p></p>) below -->
+            
+            <p id="response">{{response}}</p>
+            
+        </div>
+        
+        
+        
+    </div>
+
+    <script>
+
+
+
+
+
+        document.getElementById('final-submit').addEventListener('submit', function(event) {
+            // Prevent the default form submission
+            console.log("BUTTON WAS CLICKED!")
+            event.preventDefault();
+            var postUrl = "/website/generate_response/";
+            // Create a new FormData object, passing in the form
+    
+            // Get the value from the input field
+            let query = document.getElementById('query-input').value;
+            let vocab = document.getElementById('define-vocab').checked;
+            let length = document.getElementById('answer-length').value;
+            let instructions = document.getElementById('custom-instructions-enter').value;
+            let active = document.querySelectorAll(".buttons .btn.active")
+            let mode = active[0].innerHTML;
+    
+            // Append the extra data to the FormData object
+           
+            console.log("inputs registered")
+            
+            let dataToSend = {
+                'query': query,
+                'vocab': vocab,
+                'length': length,
+                'instructions': instructions,
+                'mode': mode
+            };
+
+            console.log(dataToSend); // check if data is properly formatted before sending
+
+            $.ajax({
+                url : postUrl, // the endpoint
+                type : "POST", // http method
+                data : dataToSend, // data sent with the post request
+
+                // handle a successful response
+                success : function(json) {
+                    console.log(json); // log the returned json to the console
+                    console.log("AJAX SUCCESSFUL")
+                    document.getElementById("response").innerHTML = json
+                },
+
+                // handle a non-successful response
+                error : function(xhr,errmsg,err) {
+                    console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+                }
+            });
+        });
+    </script>
+    
+    
+
+</body>
+</html>

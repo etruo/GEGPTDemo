@@ -1,0 +1,276 @@
+@font-face {
+  font-family: Palatino;
+  src: url(Merriweather-BlackItalic.ttf);
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: Poppins Thin;
+  src: url(Poppins-Thin.ttf);
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: Lato;
+  src: url(Lato-Black.ttf);
+  
+}
+
+
+@font-face {
+  font-family: Poppins Regular;
+  src: url(Poppins-Regular.ttf);
+  font-weight: bold;
+}
+
+
+body {
+    background-image: linear-gradient(to left, #DECBA4, #3E5151);
+}
+
+
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.navigation{
+    width: 102%;
+    height: 80px;
+    position: fixed;
+    top: -10px;
+    left: 1px;
+    background: linear-gradient(90deg, #E0C3CF, white);
+}
+
+.title{
+    position: absolute;
+    left: 60px;
+    top: -33px;
+    font-family: Lato;
+    font-style: bold;
+    font-size: 3rem;
+    color: #2a2a2b;
+    font-weight: bold;
+}
+
+.login{
+    position: fixed;
+    float: right;
+    top: 21px;
+    right: 200px;
+    font-size: 20px;
+    background: transparent;
+    color: #70565d;
+    border: none;
+    font-family: Lato;
+    transition: all .1s ease-in-out;
+}
+
+.login:hover{
+    color: black;
+    transition: all .1s ease-in-out;
+}
+
+.signup{
+    float: right;
+    position: relative;
+    top: 30px;
+    right: 30px;
+    background: transparent;
+    border: none;
+    font-family: Lato;
+}
+
+
+.signup {
+    position: relative;
+    top: -2px;
+
+    width: 150px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    margin: 20px;
+    height: 55px;
+    text-align:center;
+    border: none;
+    background-size: 300% 100%;
+    background-image: linear-gradient(to right, #25aae1, #40e495, #30dd8a, #2bb673);
+    box-shadow: 0 4px 15px 0 rgba(49, 196, 190, 0.75);
+
+    border-radius: 50px;
+    moz-transition: all .4s ease-in-out;
+    -o-transition: all .4s ease-in-out;
+    -webkit-transition: all .4s ease-in-out;
+    transition: all .4s ease-in-out;
+
+}
+
+.signup:hover {
+    background-position: 100% 0;
+    moz-transition: all .4s ease-in-out;
+    -o-transition: all .4s ease-in-out;
+    -webkit-transition: all .4s ease-in-out;
+    transition: all .4s ease-in-out;
+}
+
+.signup:focus {
+    outline: none;
+}
+
+
+.heading{
+    font-family: Poppins Regular;
+    position: relative;
+    left: 220px;
+    color: white;
+
+}
+
+
+hr {
+  border: none;
+  height: 0.5px;
+  width: 700px;
+  /* Set the hr color */
+  color: #FFF;  /* old IE */
+  background-color: #FFF;  /* Modern Browsers */
+}
+
+
+
+.paragraph{
+    font-family: Poppins Thin;
+    color: white;
+    width: 700px;
+    position: relative;
+    left: 60px;
+    text-align: center;
+}
+
+
+
+.buttons{
+    position: relative;
+    left: 110px;
+    top: -40;
+    padding-top: 100px;
+}
+
+
+.btn{
+    border:0.1em solid #FFFFFF;
+    color:#FFFFFF;
+    border-radius: 20px;
+    width: 130px;
+    height: 35px;
+    font-family: Poppins Thin;
+    font-weight:300;
+    cursor: pointer;
+    text-align: center;
+    background-color: transparent;
+    margin:0 1.5em 1.5em 0;
+    transition: all .2s ease-in-out;
+}
+
+
+.active, .btn:hover{
+    color:#000000;
+    background-color:#FFFFFF;
+    transition: all .2s ease-in-out;
+}
+
+
+.dropdown-btn{
+    font-family: Poppins Thin;
+}
+
+.options{
+    position: relative;
+    top: -20px;
+    left: 110px;
+    color: white;
+}
+
+.slider {
+    width: 100%;
+}
+
+.thirty{
+    padding-left: 30px;
+}
+
+#answer-length{
+    position: relative;
+    top: 3px;
+}
+
+.custom-instructions-label{
+    position: relative;
+    top: -51px;
+}
+
+.custom-instructions-enter{
+    width: 300px;
+}
+
+textarea {
+  border: 2px solid grey;
+  border-radius: 10px;
+  background-color: #232324;
+  font-size: 14px;
+  font-family: "Poppins Regular", sans-serif;
+  resize: none;
+  color: white;
+}
+
+
+
+
+
+
+.submit{
+    border:0.1em solid #FFFFFF;
+    color:#FFFFFF;
+    border-radius: 20px;
+    width: 50px;
+    height: 23px;
+    font-family: Poppins Thin;
+    font-weight:300;
+    cursor: pointer;
+    text-align: center;
+    background-color: transparent;
+    margin:0 1.5em 1.5em 0;
+    transition: all .2s ease-in-out;
+}
+
+
+.submit:hover{
+    color:#000000;
+    background-color:#FFFFFF;
+    transition: all .2s ease-in-out;
+}
+
+.submit:active{
+    border:0.1em solid #FFFFFF;
+    color:#FFFFFF;
+    border-radius: 20px;
+    width: 50px;
+    height: 23px;
+    font-family: Poppins Thin;
+    font-weight:300;
+    cursor: pointer;
+    text-align: center;
+    background-color: transparent;
+    margin:0 1.5em 1.5em 0;
+    transition: all .2s ease-in-out;
+}
+
+
+
+
+
+
